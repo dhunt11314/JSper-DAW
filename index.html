@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libs/Tone.js"></script>
+    <script src="libs/p5.min.js"></script>
+</head>
+<body style="background-color: #777777;">
+    <div id="notes">
+    </div>
+    <br/>
+    <button onclick="addRest()">Rest</button>
+    <button onclick="tempoChange(5)">Tempo up</button>
+    <button onclick="tempoChange(-5)">Tempo down</button>
+    <br/>
+    <br/>
+    <div id="durations">
+        <button onclick="setDuration('32n.')" class="button">32n.</button>
+        <button onclick="setDuration('32n')" class="button">32n</button>
+        <button onclick="setDuration('16n.')" class="button">16n.</button>
+        <button onclick="setDuration('16n')"class="button">16n</button>
+        <button onclick="setDuration('8n.')" class="button">8n.</button>
+        <button onclick="setDuration('8n')" class="button">8n</button>
+        <button onclick="setDuration('4n.')" class="button">4n.</button>
+        <button onclick="setDuration('4n')" class="button">4n</button>
+        <button onclick="setDuration('2n.')" class="button">2n.</button>
+        <button onclick="setDuration('2n')" class="button">2n</button>
+        <button onclick="setDuration('1n.')" class="button">1n.</button>
+        <button onclick="setDuration('1n')" class="button">1n</button>
+    </div>
+    <br/>
+    <div id="playback">
+        <button onclick="clearSequence()">Clear</button>
+        <button onclick="deleteLastNote()">Delete last note</button>
+        <button onclick=playSequences()>Play all</button>
+        <button onclick="newSequence()">New sequence</button>
+    </div>
+    <br/>
+    <div id="sequencery">
+    </div>
+    <script src=index.js></script>
+</body>
+</html>
