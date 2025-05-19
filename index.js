@@ -1,7 +1,6 @@
 let tempDuration = "8n";
 let sequences = []
 let currentSequence = 0;
-let position = 0
 let scale = 32;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(1.5).toDestination();
@@ -106,4 +105,13 @@ function saveSequences() {
     a.href = URL.createObjectURL(file);
     a.download = "sequences.json";
     a.click();
+}
+function loadSequences() {
+    let TempSequences = JSON.parse(document.getElementById("loadingText").value);
+    sequences = [];
+    document.getElementById("sequencery").innerHTML = "";
+    for (let sequence of TempSequences) {
+        newSequence();
+    }
+    sequences = TempSequences;
 }
