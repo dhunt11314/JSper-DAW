@@ -1,5 +1,4 @@
 let tempDuration = "8n";
-//let sequence = [];
 let sequences = []
 let currentSequence = 0;
 let position = 0
@@ -25,7 +24,7 @@ function draw() {
     line(mouseX,0,mouseX,height);
     line(0,mouseY,width,mouseY)
     if (sequences.length > 0) {
-        drawSequence(sequences[currentSequence]);
+        drawSequence(sequences[currentSequence].notes);
     }
 }
 function drawSequence(sequence) {
@@ -41,7 +40,7 @@ function drawSequence(sequence) {
 }
 createNoteButtons();
 function newSequence() {
-    sequences.push([]);
+    sequences.push({notes:[],type:"pianoroll"});
     let button = document.createElement("button");
     let newSequenceNumber = sequences.length-1;
     button.textContent = "Select sequence "+newSequenceNumber;
@@ -57,14 +56,14 @@ function tempoChange(change) {
 }
 function addNote(frequency, noteNum) {
     synth.triggerAttackRelease(frequency,"8n")
-    sequences[currentSequence].push({isRest:false, note:[frequency], duration:tempDuration, noteNum});
+    sequences[currentSequence].notes.push({isRest:false, note:[frequency], duration:tempDuration, noteNum});
 }
 function addRest() {
-    sequences[currentSequence].push({isRest:true, duration:tempDuration});
+    sequences[currentSequence].notes.push({isRest:true, duration:tempDuration});
 }
 function playSequences() {
     for (let sequence of sequences) {
-        playSequence(sequence);
+        playSequence(sequence.notes);
     }
 }
 function playSequence(sequence) {
@@ -75,15 +74,13 @@ function playSequence(sequence) {
             synth.triggerAttackRelease(sequence[i].note, sequence[i].duration, now+total);
         }
         total += Tone.Time(sequence[i].duration);
-        console.log(total);
-        console.log(sequence[i]);
     }
 }
 function clearSequence() {
-    sequences[currentSequence] = [];
+    sequences[currentSequence].notes = [];
 }
 function deleteLastNote() {
-    sequences[currentSequence].pop();
+    sequences[currentSequence].notes.pop();
 }
 function createNoteButtons() {
     let noteContainer = document.getElementById("notes");
@@ -101,4 +98,12 @@ function createNoteButtons() {
         let lineBreak = document.createElement("br");
         noteContainer.appendChild(lineBreak);
     }
+}
+function saveSequences() {
+    console.log(JSON.stringify(sequences));
+    let a = document.createElement("a");
+    let file = new Blob([JSON.stringify(sequences)], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+    a.download = "sequences.json";
+    a.click();
 }
