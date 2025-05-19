@@ -1,4 +1,27 @@
-button {
-    background-color: rgb(200, 170, 200);
-    font-family: "Open Sans";
+.button {
+    box-shadow: 3px 3px 4px #34221A;
+    background-color: #54423A;
+    border: 2px solid #44322A;
+    font-family: Tahoma, sans-serif;
+    color: #C3BFB8;
+    margin: 1px;
+    border-radius: 3px;
+    padding: 2px 5px;
+}
+.button:active {
+    background-color: #44322A;
+    box-shadow: 1px 1px 2px #34221A;
+    transform: translate(1px, 2px);
+}
+p {
+    font-family: Tahoma, sans-serif;
+    color: #C3BFB8;
+}
+body {
+    background: linear-gradient(to top left, #000 0%, #1f201f 70%);
+}
+.logo {
+    position: absolute;
+    right: 15px;
+    top: 10px;
 }

@@ -10,18 +10,15 @@ function setup() {
 }
 function draw() {
     clear();
-    background(150);
+    background(150,121,95);
     for (let i = 1; i<32; i++) {
-        stroke(0);
+        stroke(31,32,31);
         line(2*i*scale,0,2*i*scale,height)
     }
-    stroke(100);
+    stroke(195,191,184);
     for (let i = 0.5; i<32; i++) {
         line(2*i*scale,0,2*i*scale,height)
     }
-    stroke(255,0,0);
-    line(mouseX,0,mouseX,height);
-    line(0,mouseY,width,mouseY)
     if (sequences.length > 0) {
         drawSequence(sequences[currentSequence].notes);
     }
@@ -31,18 +28,20 @@ function drawSequence(sequence) {
     for (let note of sequence) {
         let left = totalTime*scale;
         let length = Tone.Time(note.duration)*scale;
-        fill(160,130,160);
-        stroke(100,60,100);
+        fill(31, 32, 31);
+        stroke(71, 72, 71);
         rect(left,height-(note.noteNum*10)-10,length,10);
         totalTime += Tone.Time(note.duration);
     }
 }
 createNoteButtons();
+newSequence()
 function newSequence() {
     sequences.push({notes:[],type:"pianoroll"});
     let button = document.createElement("button");
     let newSequenceNumber = sequences.length-1;
     button.textContent = "Select sequence "+newSequenceNumber;
+    button.className = "button";
     button.onclick = function(){currentSequence=newSequenceNumber;}
     document.getElementById("sequencery").appendChild(button);
     currentSequence = newSequenceNumber;
@@ -89,6 +88,7 @@ function createNoteButtons() {
         for (let note of notes) {
             let button = document.createElement("button");
             button.textContent = note+octave;
+            button.className = "button";
             let fooNoteNum = noteNum
             button.onclick = function(){addNote(note+octave, fooNoteNum);}
             noteContainer.appendChild(button);
