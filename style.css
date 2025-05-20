@@ -13,6 +13,28 @@
     box-shadow: 1px 1px 2px #34221A;
     transform: translate(1px, 2px);
 }
+input[type=file] {
+    color: #C3BFB8;
+    font-family: Tahoma, sans-serif;
+    padding: 1px;
+    border: 2px solid #34221A;
+    border-radius: 5px;
+}
+input[type=file]::file-selector-button {
+    box-shadow: 3px 3px 4px #34221A;
+    background-color: #54423A;
+    border: 2px solid #44322A;
+    font-family: Tahoma, sans-serif;
+    color: #C3BFB8;
+    margin: 1px 5px 1px 1px;
+    border-radius: 3px;
+    padding: 2px 5px;
+}
+input[type=file]::file-selector-button:active {
+    background-color: #44322A;
+    box-shadow: 1px 1px 2px #34221A;
+    transform: translate(1px, 2px);
+}
 p {
     font-family: Tahoma, sans-serif;
     color: #C3BFB8;

@@ -2,11 +2,12 @@ let tempDuration = "8n";
 let sequences = []
 let currentSequence = 0;
 let scale = 32;
+let readyToLoad = false;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(1.5).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
 function setup() {
-    createCanvas(windowWidth-15, 720);
+    createCanvas(windowWidth-20, 720);
 }
 function draw() {
     clear();
@@ -99,19 +100,24 @@ function createNoteButtons() {
     }
 }
 function saveSequences() {
-    console.log(JSON.stringify(sequences));
     let a = document.createElement("a");
-    let file = new Blob([JSON.stringify(sequences)], {type: "text/plain"});
+    let file = new Blob([JSON.stringify(sequences,null,2)], {type: "text/plain"});
     a.href = URL.createObjectURL(file);
     a.download = "sequences.json";
     a.click();
 }
-function loadSequences() {
-    let TempSequences = JSON.parse(document.getElementById("loadingText").value);
-    sequences = [];
-    document.getElementById("sequencery").innerHTML = "";
-    for (let sequence of TempSequences) {
-        newSequence();
+function loadFile() {
+    let files = document.getElementById("loadFile").files;
+    console.log(files[0]);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        let tempSequences = JSON.parse(atob(e.target.result.substring("data:application/json;base64,".length)));
+        sequences = [];
+        document.getElementById("sequencery").innerHTML = "";
+        for (let sequence of tempSequences) {
+            newSequence();
+        }
+        sequences = tempSequences;
     }
-    sequences = TempSequences;
+    reader.readAsDataURL(files[0]);
 }

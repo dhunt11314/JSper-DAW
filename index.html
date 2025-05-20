@@ -20,7 +20,7 @@
     <div id="durations">
         <button onclick="setDuration('32n')" class="button">32n</button>
         <button onclick="setDuration('32n.')" class="button">32n.</button>
-        <button onclick="setDuration('16n')"class="button">16n</button>
+        <button onclick="setDuration('16n')" class="button">16n</button>
         <button onclick="setDuration('16n.')" class="button">16n.</button>
         <button onclick="setDuration('8n')" class="button">8n</button>
         <button onclick="setDuration('8n.')" class="button">8n.</button>
@@ -41,8 +41,7 @@
         <button onclick=playSequences() class="button">Play all</button>
         <button onclick="newSequence()" class="button">New sequence</button>
         <button onclick="saveSequences()" class="button">Save</button>
-        <p>Paste contents of save file here:<p><input type="text" id="loadingText">
-        <button onclick="loadSequences()" class="button">Load sequence</button>
+        <input type="file" id="loadFile" onchange="loadFile()">
     </div>
     <br/>
     <div id="sequencery">
