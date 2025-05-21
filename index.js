@@ -83,7 +83,7 @@ function deleteLastNote() {
 }
 function createNoteButtons() {
     let noteContainer = document.getElementById("notes");
-    let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B",];
+    let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B","testing testing"];
     let noteNum = 0;
     for (let octave = 2; octave < 8; octave++) {
         for (let note of notes) {
