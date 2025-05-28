@@ -1,8 +1,9 @@
 let tempDuration = "8n";
 let sequences = []
 let currentSequence = 0;
-let scale = 32;
-let readyToLoad = false;
+let pixelsPerBeat = 16
+let theme = "wood"
+let timeSig = {top:4,bottom:4}
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(1.5).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
@@ -11,14 +12,32 @@ function setup() {
 }
 function draw() {
     clear();
-    background(150,121,95);
-    for (let i = 1; i<32; i++) {
-        stroke(31,32,31);
-        line(2*i*scale,0,2*i*scale,height)
+    let timeSigValue = document.getElementById("timeSig").value;
+    timeSig = {top:parseInt(timeSigValue.substring(0,timeSigValue.indexOf(","))), bottom:parseInt(timeSigValue.substring(timeSigValue.indexOf(","),0))};
+    if (theme === "wood") {
+        background(150,121,95);
     }
-    stroke(195,191,184);
-    for (let i = 0.5; i<32; i++) {
-        line(2*i*scale,0,2*i*scale,height)
+    if (theme === "dark") {
+        background(170, 165, 159);
+    }
+    let pixelsPerBar = pixelsPerBeat * timeSig.top;
+    for (let i = 0; i<width/pixelsPerBar; i++) {
+        if (theme === "wood") {
+            stroke(31, 32, 31);
+        }
+        else if (theme === "dark") {
+            stroke(51, 52, 59);
+        }
+        line(i*pixelsPerBar, 0, i*pixelsPerBar, height);
+        if (theme === "wood") {
+            stroke(195,191,184);
+        }
+        else if (theme === "dark") {
+            stroke(72, 84, 124);
+        }
+        for (let j = 1; j < timeSig.top; j++) {
+            line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
+        }
     }
     if (sequences.length > 0) {
         drawSequence(sequences[currentSequence].notes);
@@ -27,13 +46,17 @@ function draw() {
 function drawSequence(sequence) {
     let totalTime = 0;
     for (let note of sequence) {
-        let left = totalTime*scale;
-        let length = Tone.Time(note.duration)*scale;
+        let left = timeToBeats(totalTime);
+        let length = timeToBeats(Tone.Time(note.duration));
         fill(31, 32, 31);
         stroke(71, 72, 71);
-        rect(left,height-(note.noteNum*10)-10,length,10);
+        rect(left*pixelsPerBeat,height-(note.noteNum*10)-10,length*pixelsPerBeat,10);
         totalTime += Tone.Time(note.duration);
     }
+}
+function timeToBeats(time) {
+    let beatTime = Tone.Time(timeSig.top+"n");
+    return time/beatTime;
 }
 createNoteButtons();
 newSequence()
@@ -83,7 +106,7 @@ function deleteLastNote() {
 }
 function createNoteButtons() {
     let noteContainer = document.getElementById("notes");
-    let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B","testing testing"];
+    let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
     let noteNum = 0;
     for (let octave = 2; octave < 8; octave++) {
         for (let note of notes) {
@@ -120,4 +143,15 @@ function loadFile() {
         sequences = tempSequences;
     }
     reader.readAsDataURL(files[0]);
+}
+function changeStyle() {
+    let styleSheet = document.getElementById("theme");
+    if (theme === "wood") {
+        styleSheet.setAttribute("href", "darkStyle.css")
+        theme = "dark";
+    }
+    else if (theme === "dark") {
+        styleSheet.setAttribute("href", "woodStyle.css")
+        theme = "wood";
+    }
 }

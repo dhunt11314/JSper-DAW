@@ -3,18 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="woodStyle.css" id="theme">
     <script src="libs/Tone.js"></script>
     <script src="libs/p5.min.js"></script>
 </head>
 <body>
-    <img src="JSper-logo.png" class="logo"/>
+    <img src="JSper-logo.png" class="logo" alt="JSper: A clean, free, web-based DAW"/>
     <div id="notes">
     </div>
     <br/>
     <button onclick="addRest()" class="button">Rest</button>
     <button onclick="tempoChange(5)" class="button">Tempo up</button>
     <button onclick="tempoChange(-5)" class="button">Tempo down</button>
+    <label for="timeSig" class="text">Time signature:</label>
+    <select name="Time Signature" id="timeSig" class="dropdown">
+        <option value="2,2">2/2</option>
+        <option value="3,2">3/2</option>
+        <option value="2,4">2/4</option>
+        <option value="3,4">3/4</option>
+        <option value="4,4">4/4</option>
+        <option value="5,4">5/4</option>
+        <option value="6,4">6/4</option>
+        <option value="4,8">1/4</option>
+        <option value="3,8">3/8</option>
+        <option value="4,8">4/8</option>
+        <option value="5,8">5/8</option>
+        <option value="6,8">6/8</option>
+        <option value="7,8">7/8</option>
+        <option value="9,8">9/8</option>
+        <option value="12,8">12/8</option>
+    </select>
     <br/>
     <br/>
     <div id="durations">
@@ -42,6 +60,7 @@
         <button onclick="newSequence()" class="button">New sequence</button>
         <button onclick="saveSequences()" class="button">Save</button>
         <input type="file" id="loadFile" onchange="loadFile()">
+        <button onclick="changeStyle()" class="button">Change style</button>
     </div>
     <br/>
     <div id="sequencery">

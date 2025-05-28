@@ -47,3 +47,16 @@ body {
     right: 15px;
     top: 10px;
 }
+.dropdown {
+    color: #C3BFB8;
+    font-family: Tahoma, sans-serif;
+    background-color: #54423A;
+    border: 2px solid #44322A;
+    border-radius: 3px;
+    padding: 2px 5px;
+    margin: 1px 5px 1px 1px;
+    box-shadow: 3px 3px 4px #34221A;
+}
+.text {
+    color: #C3BFB8;
+}
