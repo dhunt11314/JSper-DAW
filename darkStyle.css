@@ -1,46 +1,48 @@
 .button {
-    box-shadow: 3px 3px 4px #34221A;
-    background-color: #54423A;
-    border: 2px solid #44322A;
+    box-shadow: 3px 3px 4px #000;
+    background-color: #33343B;
+    border: 2px solid #2f3037;
     font-family: Tahoma, sans-serif;
-    color: #C3BFB8;
+    color: #CFE7F8;
     margin: 1px;
     border-radius: 3px;
     padding: 2px 5px;
 }
 .button:active {
-    background-color: #44322A;
-    box-shadow: 1px 1px 2px #34221A;
+    background-color: #1f2027;
+    border: 2px solid #1c1d24;
+    box-shadow: 1px 1px 2px #000;
     transform: translate(1px, 2px);
 }
 input[type=file] {
-    color: #C3BFB8;
+    color: #CFE7F8;
     font-family: Tahoma, sans-serif;
     padding: 1px;
-    border: 2px solid #34221A;
+    border: 2px solid #2f3037;
     border-radius: 5px;
 }
 input[type=file]::file-selector-button {
-    box-shadow: 3px 3px 4px #34221A;
-    background-color: #54423A;
-    border: 2px solid #44322A;
+    box-shadow: 3px 3px 4px #000;
+    background-color: #33343B;
+    border: 2px solid #2f3037;
     font-family: Tahoma, sans-serif;
-    color: #C3BFB8;
-    margin: 1px 5px 1px 1px;
+    color: #CFE7F8;
+    margin: 1px;
     border-radius: 3px;
     padding: 2px 5px;
 }
 input[type=file]::file-selector-button:active {
-    background-color: #44322A;
-    box-shadow: 1px 1px 2px #34221A;
+    background-color: #1f2027;
+    box-shadow: 1px 1px 2px #000;
     transform: translate(1px, 2px);
+    border: 2px solid #1c1d24;
 }
 p {
     font-family: Tahoma, sans-serif;
-    color: #C3BFB8;
+    color: #CFE7F8;
 }
 body {
-    background: #1f201f;
+    background: #13141B;
 }
 .logo {
     position: absolute;
@@ -48,15 +50,15 @@ body {
     top: 10px;
 }
 .dropdown {
-    color: #C3BFB8;
+    color: #CFE7F8;
     font-family: Tahoma, sans-serif;
-    background-color: #54423A;
-    border: 2px solid #44322A;
+    background-color: #33343b;
+    border: 2px solid #2f3037;
     border-radius: 3px;
     padding: 2px 5px;
     margin: 1px 5px 1px 1px;
-    box-shadow: 3px 3px 4px #34221A;
+    box-shadow: 3px 3px 4px #000;
 }
 .text {
-    color: #C3BFB8;
+    color: #CFE7F8;
 }
