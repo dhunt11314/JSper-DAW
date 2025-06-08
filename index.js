@@ -5,6 +5,9 @@ let currentSequence = 0;
 let pixelsPerBeat = 16
 let theme = "wood"
 let timeSig = {top:"4,", bottom:"4"}
+let selectedNotes = [];
+let allNotes = [];
+const noteHeight = 10;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(1.5).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
@@ -27,8 +30,8 @@ function draw() {
     else if (theme === "dark") {
         stroke(150, 145, 139);
     }
-    for (let i = 1; i<height/10; i++) {
-        line(0,10*i,width,10*i);
+    for (let i = 1; i<height/noteHeight; i++) {
+        line(0,noteHeight*i,width,noteHeight*i);
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
     for (let i = 0; i<width/pixelsPerBar; i++) {
@@ -58,6 +61,38 @@ function draw() {
     noStroke();
     text("Transport time: "+Tone.Transport.seconds, 5,10);
     text("Transport state: "+Tone.Transport.state, 5,20);
+    stroke(0,0,255);
+    line(mouseX,0,mouseX,height);
+}
+function mousePressed() {
+    if (!keyIsDown(SHIFT)) {
+        selectedNotes = [];
+    }
+    let time = pixelsToTime(mouseX);
+    let note = findNoteAtTime(time);
+    if (note) {
+        let noteTop = height-(note.noteNum*noteHeight)-noteHeight;
+        let noteBottom = noteTop+noteHeight;
+        if (mouseY>=noteTop && mouseY <= noteBottom) {
+            selectedNotes.push(note);
+        }
+    }
+}
+function keyPressed() {
+    if (key === "ArrowUp") {
+        for (let note of selectedNotes) {
+            note.noteNum++;
+            note.note = allNotes[note.noteNum];
+            synth.triggerAttackRelease(note.note,"8n");
+        }
+    }
+    if (key === "ArrowDown") {
+        for (let note of selectedNotes) {
+            note.noteNum--;
+            note.note = allNotes[note.noteNum];
+            synth.triggerAttackRelease(note.note,"8n");
+        }
+    }
 }
 function drawSequence(sequence) {
     let totalTime = 0;
@@ -73,12 +108,36 @@ function drawSequence(sequence) {
             fill(31, 32, 31);
             stroke(71, 72, 71);
         }
-        rect(left*pixelsPerBeat,height-(note.noteNum*10)-10,length*pixelsPerBeat,10);
+        if (selectedNotes.includes(note)) {
+            fill(20,25,170);
+            stroke(10,13,85);
+        }
+        rect(left*pixelsPerBeat,height-(note.noteNum*noteHeight)-noteHeight,length*pixelsPerBeat,noteHeight);
         totalTime += noteLengthSeconds;
     }
 }
 function isTimeInNote(noteStart, noteDuration, timePoint) {
     return timePoint>=noteStart && timePoint<noteStart+noteDuration
+}
+function findNoteAtTime(time) {
+    console.log("searching at time "+time);
+    let total = 0;
+    let sequence = sequences[currentSequence].notes;
+    for (let i=0; i<sequence.length; i++) {
+        console.log("loop");
+        let startTime = total
+        let duration = Tone.Time(sequence[i].duration);
+        if (isTimeInNote(startTime, duration,time)) {
+            console.log("found note");
+            return sequence[i];
+        }
+        total += Tone.Time(sequence[i].duration);
+    }
+}
+function pixelsToTime(x) {
+    let beats = x/pixelsPerBeat;
+    let beatTime = Tone.Time(timeSig.bottom+"n");
+    return beats * beatTime;
 }
 function timeToBeats(time) {
     let beatTime = Tone.Time(timeSig.bottom+"n");
@@ -108,7 +167,8 @@ function tempoChange(change) {
 }
 function addNote(frequency, noteNum) {
     synth.triggerAttackRelease(frequency,"8n")
-    sequences[currentSequence].notes.push({isRest:false, note:[frequency], duration:tempDuration, noteNum});
+    //tone accepts an array when playing the note
+    sequences[currentSequence].notes.push({isRest:false, note:frequency, duration:tempDuration, noteNum});
 }
 function addRest() {
     sequences[currentSequence].notes.push({isRest:true, duration:tempDuration});
@@ -163,6 +223,7 @@ function createNoteButtons() {
         for (let note of notes) {
             let button = document.createElement("button");
             button.textContent = note+octave;
+            allNotes.push(note+octave);
             button.className = "button";
             let fooNoteNum = noteNum
             button.onclick = function(){addNote(note+octave, fooNoteNum);}
