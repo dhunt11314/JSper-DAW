@@ -1,7 +1,8 @@
 "use strict";
+let ready = false;
 let tempDuration = "4n";
-let sequences = []
-let currentSequence = 0;
+let instruments = []
+let currentInstrument = 0;
 let pixelsPerBeat = 16
 let theme = "wood"
 let timeSig = {top:"4,", bottom:"4"}
@@ -17,7 +18,10 @@ function setup() {
 function draw() {
     clear();
     let timeSigValue = document.getElementById("timeSig").value;
-    timeSig = {top:parseInt(timeSigValue.substring(0,timeSigValue.indexOf(","))), bottom:parseInt(timeSigValue.substring(timeSigValue.indexOf(",")+1,timeSigValue.length))};
+    let commaPos = timeSigValue.indexOf(",");
+    let numBeforeComma = parseInt(timeSigValue.substring(0,commaPos));
+    let numAfterComma = parseInt(timeSigValue.substring(commaPos+1));
+    timeSig = {top:numBeforeComma, bottom:numAfterComma};
     if (theme === "wood") {
         background(150,121,95);
     }
@@ -52,8 +56,8 @@ function draw() {
             line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
         }
     }
-    if (sequences.length>0) {
-        drawSequence(sequences[currentSequence].notes);
+    if (instruments.length>0) {
+        drawSequence(instruments[currentInstrument].notes);
     }
     stroke(255,0,0);
     let pixels = timeToPixels(Tone.Transport.seconds)
@@ -62,14 +66,32 @@ function draw() {
     text("Transport time: "+Tone.Transport.seconds, 5,10);
     text("Transport state: "+Tone.Transport.state, 5,20);
     stroke(0,0,255);
-    line(mouseX,0,mouseX,height);
+    let quantisedX = quantiseX(mouseX);
+    line(quantisedX,0,quantisedX,height);
+}
+function quantiseX(x) {
+    let noteLock = document.getElementById("gridLock").value;
+    let pixelsPerNoteLock = pixelsPerBeat*(timeSig.bottom/4)*noteLock;
+    return Math.floor(x/pixelsPerNoteLock)*pixelsPerNoteLock;
 }
 function mousePressed() {
+    if (!ready) {
+        Tone.start();
+        ready = true;
+    }
+    let quantisedX = quantiseX(mouseX);
+    let time = pixelsToTime(quantisedX);
+    let pixelsAboveBottomOfCanvas = height - mouseY
+    let noteNum = Math.floor(pixelsAboveBottomOfCanvas/noteHeight);
+    let pitch = allNotes[noteNum];
+    let note = findNoteAtTime(time);
     if (!keyIsDown(SHIFT)) {
         selectedNotes = [];
     }
-    let time = pixelsToTime(mouseX);
-    let note = findNoteAtTime(time);
+    if (keyIsDown(CONTROL)) {
+        synth.triggerAttackRelease(pitch,"8n");
+        addNote(pitch, noteNum, time);
+    }
     if (note) {
         let noteTop = height-(note.noteNum*noteHeight)-noteHeight;
         let noteBottom = noteTop+noteHeight;
@@ -95,12 +117,11 @@ function keyPressed() {
     }
 }
 function drawSequence(sequence) {
-    let totalTime = 0;
     for (let note of sequence) {
         let noteLengthSeconds = Tone.Time(note.duration);
-        let left = timeToBeats(totalTime);
+        let left = timeToBeats(note.noteStart);
         let length = timeToBeats(noteLengthSeconds);
-        if (isTimeInNote(totalTime, noteLengthSeconds, Tone.Transport.seconds)) {
+        if (isTimeInNote(note.noteStart, noteLengthSeconds, Tone.Transport.seconds)) {
             fill(160,170,200);
             stroke(255,255,255);
         }
@@ -113,7 +134,6 @@ function drawSequence(sequence) {
             stroke(10,13,85);
         }
         rect(left*pixelsPerBeat,height-(note.noteNum*noteHeight)-noteHeight,length*pixelsPerBeat,noteHeight);
-        totalTime += noteLengthSeconds;
     }
 }
 function isTimeInNote(noteStart, noteDuration, timePoint) {
@@ -122,7 +142,7 @@ function isTimeInNote(noteStart, noteDuration, timePoint) {
 function findNoteAtTime(time) {
     console.log("searching at time "+time);
     let total = 0;
-    let sequence = sequences[currentSequence].notes;
+    let sequence = instruments[currentInstrument].notes;
     for (let i=0; i<sequence.length; i++) {
         console.log("loop");
         let startTime = total
@@ -147,17 +167,16 @@ function timeToPixels(time) {
     let beats = timeToBeats(time);
     return pixelsPerBeat * beats;
 }
-createNoteButtons();
-newSequence()
-function newSequence() {
-    sequences.push({notes:[],type:"pianoroll"});
+newInstrument()
+function newInstrument() {
+    instruments.push({notes:[],type:"pianoroll"});
     let button = document.createElement("button");
-    let newSequenceNumber = sequences.length-1;
-    button.textContent = "Select sequence "+newSequenceNumber;
+    let newSequenceNumber = instruments.length-1;
+    button.textContent = "Select instrument "+newSequenceNumber;
     button.className = "button";
-    button.onclick = function(){currentSequence=newSequenceNumber;}
+    button.onclick = function(){currentInstrument=newSequenceNumber;}
     document.getElementById("sequencery").appendChild(button);
-    currentSequence = newSequenceNumber;
+    currentInstrument = newSequenceNumber;
 }
 function setDuration(target) {
     tempDuration = target;
@@ -165,13 +184,12 @@ function setDuration(target) {
 function tempoChange(change) {
     Tone.Transport.bpm.value += change;
 }
-function addNote(frequency, noteNum) {
-    synth.triggerAttackRelease(frequency,"8n")
-    //tone accepts an array when playing the note
-    sequences[currentSequence].notes.push({isRest:false, note:frequency, duration:tempDuration, noteNum});
+function addNote(pitch, noteNum, startTime) {
+    synth.triggerAttackRelease(pitch,"8n")
+    instruments[currentInstrument].notes.push({isRest:false, note:pitch, duration:tempDuration, noteNum, noteStart:startTime});
 }
 function addRest() {
-    sequences[currentSequence].notes.push({isRest:true, duration:tempDuration});
+    instruments[currentInstrument].notes.push({isRest:true, duration:tempDuration});
 }
 function playSequences() {
     if (Tone.Transport.state === "stopped") {
@@ -179,7 +197,7 @@ function playSequences() {
         Tone.Transport.cancel();
         Tone.Transport.seconds = 0
         let longestSequence = 0;
-        for (let sequence of sequences) {
+        for (let sequence of instruments) {
             let sequenceLength = playSequence(sequence.notes);
             if (sequenceLength > longestSequence) {
                 longestSequence = sequenceLength;
@@ -189,54 +207,51 @@ function playSequences() {
         Tone.Transport.start();
         console.log(longestSequence);
         Tone.Transport.schedule((time)=>{
-            console.log("Stopping");
-            Tone.Transport.stop();
+            Tone.Transport.stop(time);
         }, longestSequence);
     }
     else if (Tone.Transport.state === "paused") {
         Tone.Transport.start()
     }
 }
-function playSequence(sequence) {
-    let total = 0;
-    for (let i=0; i<sequence.length; i++){
-        if (sequence[i].isRest !== true) {
+function playSequence(instrument) {
+    let furthest = 0;
+    for (let i=0; i<instrument.length; i++){
+        if (instrument[i].isRest !== true) {
             Tone.Transport.schedule(function(time) {
-                synth.triggerAttackRelease(sequence[i].note, sequence[i].duration)
-            },total);
+                synth.triggerAttackRelease(instrument[i].note, instrument[i].duration,time)
+            },instrument[i].noteStart);
         }
-        total += Tone.Time(sequence[i].duration);
+        furthest = Math.max(furthest,instrument[i].noteStart+Tone.Time(instrument[i].duration));
     }
-    return total;
+    return furthest;
 }
 function clearSequence() {
-    sequences[currentSequence].notes = [];
+    instruments[currentInstrument].notes = [];
 }
 function deleteLastNote() {
-    sequences[currentSequence].notes.pop();
+    instruments[currentInstrument].notes.pop();
 }
-function createNoteButtons() {
-    let noteContainer = document.getElementById("notes");
-    let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-    let noteNum = 0;
-    for (let octave = 1; octave < 8; octave++) {
-        for (let note of notes) {
-            let button = document.createElement("button");
-            button.textContent = note+octave;
-            allNotes.push(note+octave);
-            button.className = "button";
-            let fooNoteNum = noteNum
-            button.onclick = function(){addNote(note+octave, fooNoteNum);}
-            noteContainer.appendChild(button);
-            noteNum++
-        }
-        let lineBreak = document.createElement("br");
-        noteContainer.appendChild(lineBreak);
+let noteContainer = document.getElementById("notes");
+let notesList = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+let noteNum = 0;
+for (let octave = 1; octave < 8; octave++) {
+    for (let note of notesList) {
+        let button = document.createElement("button");
+        button.textContent = note+octave;
+        allNotes.push(note+octave);
+        button.className = "button";
+        let fooNoteNum = noteNum
+        button.onclick = function(){addNote(note+octave, fooNoteNum);}
+        noteContainer.appendChild(button);
+        noteNum++
     }
+    let lineBreak = document.createElement("br");
+    noteContainer.appendChild(lineBreak);
 }
 function saveSequences() {
     let a = document.createElement("a");
-    let file = new Blob([JSON.stringify(sequences,null,2)], {type: "text/plain"});
+    let file = new Blob([JSON.stringify(instruments,null,2)], {type: "text/plain"});
     a.href = URL.createObjectURL(file);
     a.download = "sequences.json";
     a.click();
@@ -247,12 +262,12 @@ function loadFile() {
     const reader = new FileReader();
     reader.onload = (e) => {
         let tempSequences = JSON.parse(atob(e.target.result.substring("data:application/json;base64,".length)));
-        sequences = [];
+        instruments = [];
         document.getElementById("sequencery").innerHTML = "";
         for (let sequence of tempSequences) {
-            newSequence();
+            newInstrument();
         }
-        sequences = tempSequences;
+        instruments = tempSequences;
     }
     reader.readAsDataURL(files[0]);
 }

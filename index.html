@@ -32,6 +32,21 @@
         <option value="9,8">9/8</option>
         <option value="12,8">12/8</option>
     </select>
+    <label for="gridLock" class="text">Snap to grid:</label>
+    <select name="gridLock" id="gridLock" class="dropdown">
+        <option value="0.125">32n</option>
+        <option value="0.25">16n</option>
+        <option value="0.5">8n</option>
+        <option value="1" selected="selected">4n</option>
+        <option value="2">2n</option>
+        <option value="4">1n</option>
+        <option value="0.0833">32t</option>
+        <option value="0.1667">16t</option>
+        <option value="0.3333">8t</option>
+        <option value="0.6667">4t</option>
+        <option value="1.3333">2t</option>
+        <option value="2.6667">1t</option>
+    </select>
     <br/>
     <br/>
     <div id="durations">
@@ -59,7 +74,7 @@
         <button onclick=playSequences() class="button">Play all</button>
         <button onclick=stopSequences() class="button">Stop all</button>
         <button onclick=pauseSequences() class="button">Pause/unpause all</button>
-        <button onclick="newSequence()" class="button">New sequence</button>
+        <button onclick="newInstrument()" class="button">New instrument</button>
         <button onclick="saveSequences()" class="button">Save</button>
         <input type="file" id="loadFile" onchange="loadFile()">
         <button onclick="changeStyle()" class="button">Change style</button>
