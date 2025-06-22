@@ -8,15 +8,20 @@ let theme = "wood"
 let timeSig = {top:"4,", bottom:"4"}
 let selectedNotes = [];
 let allNotes = [];
-const noteHeight = 10;
+let noteHeight = 10;
+let fontSize = 12;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(2).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
 function setup() {
-    createCanvas(windowWidth*2, 840);
+    createCanvas(windowWidth-15, 840);
 }
 function draw() {
     clear();
+    let xZoomLevel = document.getElementById("horizontalZoom").value;
+    pixelsPerBeat = 16*(Math.pow(2,xZoomLevel-1));
+    let yZoomLevel = document.getElementById("verticalZoom").value;
+    noteHeight = 10*(Math.pow(2,yZoomLevel-1));
     let timeSigValue = document.getElementById("timeSig").value;
     let commaPos = timeSigValue.indexOf(",");
     let numBeforeComma = parseInt(timeSigValue.substring(0,commaPos));
@@ -35,7 +40,7 @@ function draw() {
         stroke(150, 145, 139);
     }
     for (let i = 1; i<height/noteHeight; i++) {
-        line(0,noteHeight*i,width,noteHeight*i);
+        line(0,height-(noteHeight*i),width,height-(noteHeight*i));
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
     for (let i = 0; i<width/pixelsPerBar; i++) {
@@ -55,11 +60,6 @@ function draw() {
         for (let j = 1; j < timeSig.top; j++) {
             line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
         }
-        noStroke();
-        fill(40,40,40)
-        for (let i = 0; i < allNotes.length; i++) {
-            text(allNotes[i],5,height-(i*noteHeight));
-        }
         strokeWeight(1)
     }
     if (instruments.length>0) {
@@ -69,11 +69,18 @@ function draw() {
     let pixels = timeToPixels(Tone.Transport.seconds)
     line(pixels,0,pixels,height);
     noStroke();
+    textSize(fontSize);
     text("Transport time: "+Tone.Transport.seconds, 30,10);
     text("Transport state: "+Tone.Transport.state, 30,20);
     stroke(0,0,255);
     let quantisedX = quantiseX(mouseX);
     line(quantisedX,0,quantisedX,height);
+    noStroke();
+    fill(40,40,40)
+    for (let i = 0; i < allNotes.length; i++) {
+        let offset = (noteHeight-fontSize)/2
+        text(allNotes[i],5,height-(i*noteHeight)-offset);
+    }
 }
 function quantiseX(x) {
     let noteLock = document.getElementById("gridLock").value;
@@ -191,10 +198,7 @@ function tempoChange(change) {
 }
 function addNote(pitch, noteNum, startBeat) {
     synth.triggerAttackRelease(pitch,"8n")
-    instruments[currentInstrument].notes.push({isRest:false, note:pitch, duration:tempDuration, noteNum, noteStart:startBeat });
-}
-function addRest() {
-    instruments[currentInstrument].notes.push({isRest:true, duration:tempDuration});
+    instruments[currentInstrument].notes.push({note:pitch, duration:tempDuration, noteNum, noteStart:startBeat });
 }
 function playSequences() {
     if (Tone.Transport.state === "stopped") {
@@ -220,11 +224,9 @@ function playSequences() {
 function playSequence(instrument) {
     let furthest = 0;
     for (let i=0; i<instrument.length; i++){
-        if (instrument[i].isRest !== true) {
-            Tone.Transport.schedule(function(time) {
-                synth.triggerAttackRelease(instrument[i].note, instrument[i].duration,time)
-            },instrument[i].noteStart);
-        }
+        Tone.Transport.schedule(function(time) {
+            synth.triggerAttackRelease(instrument[i].note, instrument[i].duration,time)
+        },instrument[i].noteStart);
         furthest = Math.max(furthest,instrument[i].noteStart+Tone.Time(instrument[i].duration));
     }
     return furthest;
