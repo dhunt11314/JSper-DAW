@@ -4,7 +4,6 @@ let tempDuration = "4n";
 let instruments = []
 let currentInstrument = 0;
 let pixelsPerBeat = 16
-let theme = "wood"
 let timeSig = {top:"4,", bottom:"4"}
 let selectedNotes = [];
 let allNotes = [];
@@ -27,56 +26,38 @@ function draw() {
     let numBeforeComma = parseInt(timeSigValue.substring(0,commaPos));
     let numAfterComma = parseInt(timeSigValue.substring(commaPos+1));
     timeSig = {top:numBeforeComma, bottom:numAfterComma};
-    if (theme === "wood") {
-        background(150,121,95);
-    }
-    else if (theme === "dark") {
-        background(170, 165, 159);
-    }
-    if (theme === "wood") {
-        stroke(130, 101, 75);
-    }
-    else if (theme === "dark") {
-        stroke(150, 145, 139);
-    }
+    background(46,52,64);
+    stroke(59,66,82);
     for (let i = 1; i<height/noteHeight; i++) {
         line(0,height-(noteHeight*i),width,height-(noteHeight*i));
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
     for (let i = 0; i<width/pixelsPerBar; i++) {
-        if (theme === "wood") {
-            stroke(31, 32, 31);
-        }
-        else if (theme === "dark") {
-            stroke(51, 52, 59);
-        }
+        stroke(94,129,172);
         line(i*pixelsPerBar, 0, i*pixelsPerBar, height);
-        if (theme === "wood") {
-            stroke(195,191,184);
-        }
-        else if (theme === "dark") {
-            stroke(72, 84, 124);
-        }
+        stroke(76,86,104);
         for (let j = 1; j < timeSig.top; j++) {
+            strokeWeight(1);
             line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
         }
-        strokeWeight(1)
+        strokeWeight(2);
     }
     if (instruments.length>0) {
         drawSequence(instruments[currentInstrument].notes);
     }
-    stroke(255,0,0);
+    stroke(191,97,106);
     let pixels = timeToPixels(Tone.Transport.seconds)
     line(pixels,0,pixels,height);
     noStroke();
     textSize(fontSize);
+    fill(216,222,233);
     text("Transport time: "+Tone.Transport.seconds, 30,10);
     text("Transport state: "+Tone.Transport.state, 30,20);
-    stroke(0,0,255);
+    stroke(94,129,172);
     let quantisedX = quantiseX(mouseX);
     line(quantisedX,0,quantisedX,height);
     noStroke();
-    fill(40,40,40)
+    fill(216,222,233)
     for (let i = 0; i < allNotes.length; i++) {
         let offset = (noteHeight-fontSize)/2
         text(allNotes[i],5,height-(i*noteHeight)-offset);
@@ -140,16 +121,16 @@ function drawSequence(sequence) {
         let left = timeToBeats(note.noteStart);
         let length = timeToBeats(noteLengthSeconds);
         if (isTimeInNote(note.noteStart, noteLengthSeconds, Tone.Transport.seconds)) {
-            fill(160,170,200);
-            stroke(255,255,255);
+            fill(216,222,233);
+            stroke(236,239,244);
         }
         else {
-            fill(31, 32, 31);
-            stroke(71, 72, 71);
+            fill(94,129,172);
+            stroke(136,192,208);
         }
         if (selectedNotes.includes(note)) {
-            fill(20,25,170);
-            stroke(10,13,85);
+            fill(191,97,106);
+            stroke(208,135,112);
         }
         rect(left*pixelsPerBeat,height-(note.noteNum*noteHeight)-noteHeight,length*pixelsPerBeat,noteHeight);
     }
@@ -262,17 +243,6 @@ function loadFile() {
         instruments = tempSequences;
     }
     reader.readAsDataURL(files[0]);
-}
-function changeStyle() {
-    let styleSheet = document.getElementById("theme");
-    if (theme === "wood") {
-        styleSheet.setAttribute("href", "darkStyle.css")
-        theme = "dark";
-    }
-    else if (theme === "dark") {
-        styleSheet.setAttribute("href", "woodStyle.css")
-        theme = "wood";
-    }
 }
 function stopSequences() {
     Tone.Transport.stop();
