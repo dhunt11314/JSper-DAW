@@ -9,10 +9,6 @@
 </head>
 <body>
     <img src="JSper-logo.png" class="logo" alt="JSper: A clean, free, web-based DAW"/>
-    <div id="notes">
-    </div>
-    <br/>
-    <button onclick="addRest()" class="button">Rest</button>
     <button onclick="tempoChange(5)" class="button">Tempo up</button>
     <button onclick="tempoChange(-5)" class="button">Tempo down</button>
     <label for="timeSig" class="text">Time signature:</label>
@@ -47,8 +43,6 @@
         <option value="1.3333">2t</option>
         <option value="2.6667">1t</option>
     </select>
-    <br/>
-    <br/>
     <div id="durations">
         <button onclick="setDuration('32n')" class="button">32n</button>
         <button onclick="setDuration('32n.')" class="button">32n.</button>
@@ -67,19 +61,15 @@
         <button onclick="setDuration('4t')" class="button">4n triplet</button>
         <button onclick="setDuration('2t')" class="button">2n triplet</button>
     </div>
-    <br/>
     <div id="playback">
         <button onclick="clearSequence()" class="button">Clear</button>
-        <button onclick="deleteLastNote()" class="button">Delete last note</button>
         <button onclick=playSequences() class="button">Play all</button>
         <button onclick=stopSequences() class="button">Stop all</button>
         <button onclick=pauseSequences() class="button">Pause/unpause all</button>
         <button onclick="newInstrument()" class="button">New instrument</button>
         <button onclick="saveSequences()" class="button">Save</button>
         <input type="file" id="loadFile" onchange="loadFile()">
-        <button onclick="changeStyle()" class="button">Change style</button>
     </div>
-    <br/>
     <div id="sequencery">
     </div>
     <script src=index.js></script>

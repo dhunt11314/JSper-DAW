@@ -1,7 +1,7 @@
 .button {
     box-shadow: 3px 3px 4px #000;
-    background-color: #33343B;
-    border: 2px solid #2f3037;
+    background-color: #191717;
+    border: 2px solid #2f2728;
     font-family: Tahoma, sans-serif;
     color: #CFE7F8;
     margin: 1px;
@@ -23,8 +23,8 @@ input[type=file] {
 }
 input[type=file]::file-selector-button {
     box-shadow: 3px 3px 4px #000;
-    background-color: #33343B;
-    border: 2px solid #2f3037;
+    background-color: #191717;
+    border: 2px solid #2f2728;
     font-family: Tahoma, sans-serif;
     color: #CFE7F8;
     margin: 1px;
