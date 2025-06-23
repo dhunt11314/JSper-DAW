@@ -9,6 +9,7 @@ let selectedNotes = [];
 let allNotes = [];
 let noteHeight = 10;
 let fontSize = 12;
+let drawingStart = 0;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(2).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
@@ -17,6 +18,7 @@ function setup() {
 }
 function draw() {
     clear();
+    translate(-(drawingStart*pixelsPerBeat),0);
     let xZoomLevel = document.getElementById("horizontalZoom").value;
     pixelsPerBeat = 16*(Math.pow(2,xZoomLevel-1));
     let yZoomLevel = document.getElementById("verticalZoom").value;
@@ -32,7 +34,10 @@ function draw() {
         line(0,height-(noteHeight*i),width,height-(noteHeight*i));
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
-    for (let i = 0; i<width/pixelsPerBar; i++) {
+    let barsInCurrentSequence = Math.ceil(timeToBeats(sequenceLength(instruments[currentInstrument].notes))/timeSig.top);
+    text(barsInCurrentSequence,150,10);
+    for (let i = 0; i<barsInCurrentSequence+1; i++) {
+        strokeWeight(2);
         stroke(94,129,172);
         line(i*pixelsPerBar, 0, i*pixelsPerBar, height);
         stroke(76,86,104);
@@ -40,7 +45,6 @@ function draw() {
             strokeWeight(1);
             line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
         }
-        strokeWeight(2);
     }
     if (instruments.length>0) {
         drawSequence(instruments[currentInstrument].notes);
@@ -73,13 +77,12 @@ function mousePressed() {
         Tone.start();
         ready = true;
     }
-    let quantisedX = quantiseX(mouseX).quantisedX;
+    let quantisedX = quantiseX(mouseX + 2*(drawingStart*pixelsPerBeat)).quantisedX;
     let time = pixelsToTime(quantisedX);
     let pixelsAboveBottomOfCanvas = height - mouseY
     let noteNum = Math.floor(pixelsAboveBottomOfCanvas/noteHeight);
     let pitch = allNotes[noteNum];
     let note = findNoteAtLocation(time,pitch);
-
     let beats = (quantisedX/pixelsPerBeat)/2;
     if (!keyIsDown(SHIFT)) {
         selectedNotes = [];
@@ -116,9 +119,10 @@ function keyPressed() {
     }
 }
 function drawSequence(sequence) {
+    drawingStart = document.getElementById("scroll").value;
     for (let note of sequence) {
         let noteLengthSeconds = Tone.Time(note.duration);
-        let left = timeToBeats(note.noteStart);
+        let left = timeToBeats(note.noteStart)-drawingStart;
         let length = timeToBeats(noteLengthSeconds);
         if (isTimeInNote(note.noteStart, noteLengthSeconds, Tone.Transport.seconds)) {
             fill(216,222,233);
@@ -180,6 +184,13 @@ function tempoChange(change) {
 function addNote(pitch, noteNum, startBeat) {
     synth.triggerAttackRelease(pitch,"8n")
     instruments[currentInstrument].notes.push({note:pitch, duration:tempDuration, noteNum, noteStart:startBeat });
+}
+function sequenceLength(instrument) {
+    let furthest = 0;
+    for (let i=0; i<instrument.length; i++){
+        furthest = Math.max(furthest,instrument[i].noteStart+Tone.Time(instrument[i].duration));
+    }
+    return furthest;
 }
 function playSequences() {
     if (Tone.Transport.state === "stopped") {
