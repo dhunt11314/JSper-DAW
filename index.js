@@ -9,12 +9,13 @@ let selectedNotes = [];
 let allNotes = [];
 let noteHeight = 10;
 let fontSize = 12;
-let pixelOffset = 0;
+let pixelXOffset = 0;
+let pixelYOffset = 0;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(2).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
 function setup() {
-    createCanvas(windowWidth-15, 840);
+    createCanvas(windowWidth-15, windowHeight-135);
 }
 function draw() {
     clear();
@@ -22,13 +23,13 @@ function draw() {
     let scrollThreshold = width/4;
     push();
     if (Tone.Transport.state === "started") {
-    translate(0,0);
+        translate(0,pixelYOffset);
         if (playheadPixels > scrollThreshold) {
-            translate(scrollThreshold - playheadPixels, 0);
+            translate(scrollThreshold - playheadPixels, pixelYOffset);
         }
     }
     else {
-        translate(pixelOffset, 0);
+        translate(pixelXOffset, pixelYOffset);
     }
     let xZoomLevel = document.getElementById("horizontalZoom").value;
     pixelsPerBeat = 16*(Math.pow(2,xZoomLevel-1));
@@ -41,7 +42,7 @@ function draw() {
     timeSig = {top:numBeforeComma, bottom:numAfterComma};
     background(46,52,64);
     stroke(59,66,82);
-    for (let i = 1; i<height/noteHeight; i++) {
+    for (let i = 1; i<allNotes.length; i++) {
         line(0,height-(noteHeight*i),width,height-(noteHeight*i));
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
@@ -49,18 +50,18 @@ function draw() {
     for (let i = 0; i<barsInCurrentSequence+1; i++) {
         strokeWeight(2);
         stroke(94,129,172);
-        line(i*pixelsPerBar, 0, i*pixelsPerBar, height);
+        line(i*pixelsPerBar, -905, i*pixelsPerBar, height);
         stroke(76,86,104);
         for (let j = 1; j < timeSig.top; j++) {
             strokeWeight(1);
-            line(i*pixelsPerBar+j*pixelsPerBeat, 0, i*pixelsPerBar+j*pixelsPerBeat, height);
+            line(i*pixelsPerBar+j*pixelsPerBeat, -905, i*pixelsPerBar+j*pixelsPerBeat, height);
         }
     }
     if (instruments.length>0) {
         drawSequence(instruments[currentInstrument].notes);
     }
     stroke(191,97,106);
-    line(playheadPixels,0,playheadPixels,height);
+    line(playheadPixels,-905,playheadPixels,height);
     pop();
     noStroke();
     textSize(fontSize);
@@ -74,7 +75,7 @@ function draw() {
     fill(216,222,233);
     for (let i = 0; i < allNotes.length; i++) {
         let offset = (noteHeight-fontSize)/2
-        text(allNotes[i],5,height-(i*noteHeight)-offset);
+        text(allNotes[i],5,height-(i*noteHeight)-offset+pixelYOffset);
     }
 }
 function quantiseX(x) {
@@ -87,10 +88,10 @@ function mousePressed() {
         Tone.start();
         ready = true;
     }
-    let quantisedX = quantiseX(mouseX-pixelOffset).quantisedX;
+    let quantisedX = quantiseX(mouseX-pixelXOffset).quantisedX;
     let time = pixelsToTime(quantisedX);
     let pixelsAboveBottomOfCanvas = height - mouseY
-    let noteNum = Math.floor(pixelsAboveBottomOfCanvas/noteHeight);
+    let noteNum = Math.floor((pixelsAboveBottomOfCanvas+pixelYOffset)/noteHeight);
     let pitch = allNotes[noteNum];
     let note = findNoteAtLocation(time,pitch);
     let beats = (quantisedX/pixelsPerBeat)/2;
@@ -117,11 +118,17 @@ function mouseWheel(event) {
     if (keyIsDown(16)) {
         console.log("shift");
         if (event.delta < 0) {
-            pixelOffset = Math.min(0, pixelOffset+pixelsPerBeat);
+            pixelXOffset = Math.min(0, pixelXOffset+pixelsPerBeat);
         }
         else {
-            pixelOffset -= pixelsPerBeat;
+            pixelXOffset -= pixelsPerBeat;
         }
+    }
+    else if (event.delta < 0) {
+        pixelYOffset += noteHeight;
+    }
+    else {
+        pixelYOffset -= noteHeight;
     }
 }
 function keyPressed() {
