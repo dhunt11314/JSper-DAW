@@ -9,7 +9,7 @@ let selectedNotes = [];
 let allNotes = [];
 let noteHeight = 10;
 let fontSize = 12;
-let drawingStart = 0;
+let pixelOffset = 0;
 const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(2).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
@@ -18,7 +18,18 @@ function setup() {
 }
 function draw() {
     clear();
-    translate(-(drawingStart*pixelsPerBeat),0);
+    let playheadPixels = timeToPixels(Tone.Transport.seconds)
+    let scrollThreshold = width/4;
+    push();
+    if (Tone.Transport.state === "started") {
+    translate(0,0);
+        if (playheadPixels > scrollThreshold) {
+            translate(scrollThreshold - playheadPixels, 0);
+        }
+    }
+    else {
+        translate(pixelOffset, 0);
+    }
     let xZoomLevel = document.getElementById("horizontalZoom").value;
     pixelsPerBeat = 16*(Math.pow(2,xZoomLevel-1));
     let yZoomLevel = document.getElementById("verticalZoom").value;
@@ -35,7 +46,6 @@ function draw() {
     }
     let pixelsPerBar = pixelsPerBeat * timeSig.top;
     let barsInCurrentSequence = Math.ceil(timeToBeats(sequenceLength(instruments[currentInstrument].notes))/timeSig.top);
-    text(barsInCurrentSequence,150,10);
     for (let i = 0; i<barsInCurrentSequence+1; i++) {
         strokeWeight(2);
         stroke(94,129,172);
@@ -50,8 +60,8 @@ function draw() {
         drawSequence(instruments[currentInstrument].notes);
     }
     stroke(191,97,106);
-    let pixels = timeToPixels(Tone.Transport.seconds)
-    line(pixels,0,pixels,height);
+    line(playheadPixels,0,playheadPixels,height);
+    pop();
     noStroke();
     textSize(fontSize);
     fill(216,222,233);
@@ -61,7 +71,7 @@ function draw() {
     let quantisedX = quantiseX(mouseX);
     line(quantisedX,0,quantisedX,height);
     noStroke();
-    fill(216,222,233)
+    fill(216,222,233);
     for (let i = 0; i < allNotes.length; i++) {
         let offset = (noteHeight-fontSize)/2
         text(allNotes[i],5,height-(i*noteHeight)-offset);
@@ -77,7 +87,7 @@ function mousePressed() {
         Tone.start();
         ready = true;
     }
-    let quantisedX = quantiseX(mouseX + 2*(drawingStart*pixelsPerBeat)).quantisedX;
+    let quantisedX = quantiseX(mouseX-pixelOffset).quantisedX;
     let time = pixelsToTime(quantisedX);
     let pixelsAboveBottomOfCanvas = height - mouseY
     let noteNum = Math.floor(pixelsAboveBottomOfCanvas/noteHeight);
@@ -102,6 +112,18 @@ function mousePressed() {
         }
     }
 }
+function mouseWheel(event) {
+    console.log(event.delta);
+    if (keyIsDown(16)) {
+        console.log("shift");
+        if (event.delta < 0) {
+            pixelOffset = Math.min(0, pixelOffset+pixelsPerBeat);
+        }
+        else {
+            pixelOffset -= pixelsPerBeat;
+        }
+    }
+}
 function keyPressed() {
     if (key === "ArrowUp") {
         for (let note of selectedNotes) {
@@ -119,10 +141,9 @@ function keyPressed() {
     }
 }
 function drawSequence(sequence) {
-    drawingStart = document.getElementById("scroll").value;
     for (let note of sequence) {
         let noteLengthSeconds = Tone.Time(note.duration);
-        let left = timeToBeats(note.noteStart)-drawingStart;
+        let left = timeToBeats(note.noteStart);
         let length = timeToBeats(noteLengthSeconds);
         if (isTimeInNote(note.noteStart, noteLengthSeconds, Tone.Transport.seconds)) {
             fill(216,222,233);
