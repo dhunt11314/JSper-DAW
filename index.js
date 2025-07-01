@@ -15,7 +15,7 @@ const lowPass = new Tone.AutoFilter("1000").toDestination();
 const reverb = new Tone.Reverb(2).toDestination();
 const synth = new Tone.PolySynth().connect(reverb).connect(lowPass);
 function setup() {
-    createCanvas(windowWidth-15, windowHeight-135);
+    createCanvas(windowWidth-15, windowHeight-150);
 }
 function draw() {
     clear();
@@ -25,7 +25,7 @@ function draw() {
     if (Tone.Transport.state === "started") {
         translate(0,pixelYOffset);
         if (playheadPixels > scrollThreshold) {
-            translate(scrollThreshold - playheadPixels, pixelYOffset);
+            translate(scrollThreshold - playheadPixels, 0);
         }
     }
     else {
